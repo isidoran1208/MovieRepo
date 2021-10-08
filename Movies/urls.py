@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from test.simplerouter import router
+from test.views import handle_reaction
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -24,6 +25,6 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('', include(router.urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
-
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('movies/<int:pk>/reactions/', handle_reaction, name="handle_reaction")
 ]

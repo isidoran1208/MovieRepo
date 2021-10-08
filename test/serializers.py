@@ -6,15 +6,9 @@ from test.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-GENRE_CHOICES=(
-    ("TR", "Thriller"),
-    ("RO", "Romantic"),
-    ("AC", "Action"),
-    ("CR", "Crime"),
-    ("HO", "Horror"),
-)
 
 class MovieSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
     title = serializers.CharField(max_length=100)
     description = serializers.CharField(max_length=300)
     start_date = serializers.DateField()
@@ -27,7 +21,8 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ['title', 'description', 'genre', 'start_date','user']
+        fields = ['id', 'title', 'description', 'genre', 'start_date', 'user']
+
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=50)
@@ -39,3 +34,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_password(self, val):
         return make_password(val)
+
+
+class ReactionSerializer(serializers.ModelSerializer):
+    user = ForeignKey(User, on_delete=CASCADE)
+    movie = ForeignKey(Movie, on_delete=CASCADE)
+    reaction = models.BooleanField(default=False)
+
+    class Meta:
+        model = Reaction
+        fields = ['user', 'movie', 'reaction']

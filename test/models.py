@@ -25,6 +25,13 @@ class Movie(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def likes(self):
+        return self.reactions.likes
+
+    def dislikes(self):
+        return self.reactions.dislikes
+
+
 @shared_task
 def send_mail_async(id):
     movie = Movie.objects.get(id=id)
@@ -36,8 +43,15 @@ def send_mail_async(id):
         fail_silently=False,
     )
 
+
 @receiver(post_save, sender=Movie, dispatch_uid="send_mail_movie")
 def send_mail_movie(sender, instance, created, **kwargs):
     if created:
         send_mail_async.delay(instance.id)
-        
+
+
+class Reaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    movie = models.ForeignKey(
+        Movie, on_delete=models.CASCADE, related_name="reactions")
+    reaction = models.BooleanField(default=False)
