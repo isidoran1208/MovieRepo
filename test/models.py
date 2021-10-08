@@ -4,6 +4,8 @@ from django.core.mail import send_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from celery import shared_task
+from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import parser_classes
 
 GENRE_CHOICES = (
     ("TR", "Thriller"),
@@ -14,6 +16,7 @@ GENRE_CHOICES = (
 )
 
 
+@parser_classes((MultiPartParser, ))
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=300)
@@ -23,6 +26,7 @@ class Movie(models.Model):
         choices=GENRE_CHOICES,
         default="AC",
     )
+    photo = models.ImageField(upload_to='movie_imgs', null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def likes(self):

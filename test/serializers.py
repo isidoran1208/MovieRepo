@@ -17,11 +17,12 @@ class MovieSerializer(serializers.ModelSerializer):
         choices=GENRE_CHOICES,
         default="AC",
     )
+    photo = models.ImageField(upload_to='movie_imgs', null=True)
     user = ForeignKey(User, on_delete=CASCADE)
 
     class Meta:
         model = Movie
-        fields = ['id', 'title', 'description', 'genre', 'start_date', 'user']
+        fields = ['id', 'title', 'description', 'genre', 'start_date', 'photo', 'user']
 
 
 class UserSerializer(serializers.ModelSerializer):

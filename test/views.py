@@ -8,12 +8,14 @@ from rest_framework import viewsets, mixins, filters
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
+from test.pagination import StandardResultsSetPagination
 
 
 class MovieViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+    pagination_class= StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['genre']
     search_fields = ['genre']
