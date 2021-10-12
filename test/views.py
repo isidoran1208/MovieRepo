@@ -1,7 +1,7 @@
-from http.client import INTERNAL_SERVER_ERROR, NOT_FOUND, OK
+from http.client import BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK
 from django.http import *
 from rest_framework import views, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action, api_view
 from .models import *
 from .serializers import *
 from rest_framework import viewsets, mixins, filters
@@ -20,6 +20,21 @@ class MovieViewSet(viewsets.ModelViewSet):
     filterset_fields = ['genre']
     search_fields = ['genre']
 
+    @action(methods=['get'], detail=True)
+    def comments(self, request, pk):
+       comments = Movie.objects.get(id=pk).comments.all()
+       return Response(CommentSerializer(comments, many=True).data, status=OK)
+
+    @action(methods=['get'], detail=True)
+    def likes(self, request, pk):
+       likes = Movie.objects.get(id=pk).reactions.filter(reaction=True)
+       return Response(likes.count(), status=OK)   
+
+    @action(methods=['get'], detail=True)
+    def dislikes(self, request, pk):
+       dislikes = Movie.objects.get(id=pk).reactions.filter(reaction=False)
+       return Response(dislikes.count(), status=OK)     
+
 
 class AuthViewSet(viewsets.GenericViewSet,
                   mixins.RetrieveModelMixin,
@@ -31,6 +46,9 @@ class AuthViewSet(viewsets.GenericViewSet,
 
 @api_view(http_method_names=['post'])
 def handle_reaction(request, pk):
+
+    if not request.user.is_authenticated:
+        return Response('User is not authenticated!', status=BAD_REQUEST)
 
     try:
         Movie.objects.get(id=pk)
@@ -57,3 +75,39 @@ def handle_reaction(request, pk):
 
     except Exception as e:
         raise e
+
+
+@api_view(http_method_names=['post'])
+def handle_comment_reaction(request, pk):
+
+    if not request.user.is_authenticated:
+        return Response('User is not authenticated!', status=BAD_REQUEST)
+
+    try:
+        Comment.objects.get(id=pk)
+    except Comment.DoesNotExist:
+        return Response('Non existing Comment!', status=NOT_FOUND)
+
+    try:
+        reaction = CommentReaction.objects.get(user_id=request.data.get('user'), comment_id=pk)
+
+        reaction.reaction = not reaction.reaction
+        reaction.save()
+
+        return Response(CommentReactionSerializer(reaction).data, status=OK)
+
+    except CommentReaction.DoesNotExist:
+        reaction = CommentReaction.objects.create(
+            user_id=request.data.get('user'), comment_id=pk, reaction=request.data.get('reaction'))
+
+        return Response(CommentReactionSerializer(reaction).data, status=OK)
+
+    except Exception as e:
+        raise e    
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticated,)
+     

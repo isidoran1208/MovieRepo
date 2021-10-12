@@ -6,6 +6,8 @@ from django.dispatch import receiver
 from celery import shared_task
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import parser_classes
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 GENRE_CHOICES = (
     ("TR", "Thriller"),
@@ -28,12 +30,6 @@ class Movie(models.Model):
     )
     photo = models.ImageField(upload_to='movie_imgs', null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    def likes(self):
-        return self.reactions.likes
-
-    def dislikes(self):
-        return self.reactions.dislikes
 
 
 @shared_task
@@ -59,3 +55,18 @@ class Reaction(models.Model):
     movie = models.ForeignKey(
         Movie, on_delete=models.CASCADE, related_name="reactions")
     reaction = models.BooleanField(default=False)
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    movie = models.ForeignKey(
+        Movie, on_delete=models.CASCADE, related_name="comments")
+    text = models.CharField(max_length=500)
+    reply_to = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+
+
+class CommentReaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(
+        Comment, on_delete=models.CASCADE, related_name="reactions")
+    reaction = models.BooleanField(default=False)    

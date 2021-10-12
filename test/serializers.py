@@ -17,7 +17,7 @@ class MovieSerializer(serializers.ModelSerializer):
         choices=GENRE_CHOICES,
         default="AC",
     )
-    photo = models.ImageField(upload_to='movie_imgs', null=True)
+    photo = models.ImageField(null=True)
     user = ForeignKey(User, on_delete=CASCADE)
 
     class Meta:
@@ -40,8 +40,27 @@ class UserSerializer(serializers.ModelSerializer):
 class ReactionSerializer(serializers.ModelSerializer):
     user = ForeignKey(User, on_delete=CASCADE)
     movie = ForeignKey(Movie, on_delete=CASCADE)
-    reaction = models.BooleanField(default=False)
+    reaction = serializers.BooleanField(default=False)
 
     class Meta:
         model = Reaction
         fields = ['user', 'movie', 'reaction']
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = ForeignKey(User, on_delete=CASCADE)
+    movie = ForeignKey(Movie, on_delete=CASCADE)
+    text = serializers.CharField(max_length=500)
+    reply_to = ForeignKey(Comment, on_delete=CASCADE)
+
+    class Meta:
+        model = Comment
+        fields = ['user', 'movie', 'text', 'reply_to']
+
+class CommentReactionSerializer(serializers.ModelSerializer):
+    user = ForeignKey(User, on_delete=CASCADE)
+    comment = ForeignKey(Comment, on_delete=CASCADE)
+    reaction = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = CommentReaction
+        fields = ['user', 'comment', 'reaction']
