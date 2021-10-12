@@ -1,0 +1,8 @@
+Django
+mysqlclient
+django-mysql
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+celery
+Pillow
