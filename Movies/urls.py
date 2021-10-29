@@ -21,11 +21,16 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('', include(router.urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('movies/<int:pk>/reactions/', handle_reaction, name="handle_reaction"),
-    path('comments/<int:pk>/reactions/', handle_comment_reaction, name="handle_comment_reaction"),
+    path('comments/<int:pk>/reactions/', handle_comment_reaction,
+         name="handle_comment_reaction"),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

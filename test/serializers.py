@@ -19,10 +19,11 @@ class MovieSerializer(serializers.ModelSerializer):
     )
     photo = models.ImageField(null=True)
     user = ForeignKey(User, on_delete=CASCADE)
-
+    
     class Meta:
         model = Movie
-        fields = ['id', 'title', 'description', 'genre', 'start_date', 'photo', 'user']
+        fields = ['id', 'title', 'description', 'genre', 'start_date', 'photo', 'user', 'comments', 'reactions']
+        depth = 2
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -47,6 +48,7 @@ class ReactionSerializer(serializers.ModelSerializer):
         fields = ['user', 'movie', 'reaction']
 
 class CommentSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
     user = ForeignKey(User, on_delete=CASCADE)
     movie = ForeignKey(Movie, on_delete=CASCADE)
     text = serializers.CharField(max_length=500)
@@ -54,7 +56,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['user', 'movie', 'text', 'reply_to']
+        fields = ['id', 'user', 'movie', 'text', 'reply_to', 'replies', 'reactions']
+        depth = 1
+
+class CommentPostSerializer(serializers.ModelSerializer):
+    user = ForeignKey(User, on_delete=CASCADE)
+    movie = ForeignKey(Movie, on_delete=CASCADE)
+    text = serializers.CharField(max_length=500)
+    reply_to = ForeignKey(Comment, on_delete=CASCADE)
+
+    class Meta:
+        model = Comment
+        fields = ['user', 'movie', 'text', 'reply_to']     
 
 class CommentReactionSerializer(serializers.ModelSerializer):
     user = ForeignKey(User, on_delete=CASCADE)

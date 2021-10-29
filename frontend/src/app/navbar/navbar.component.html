@@ -1,0 +1,18 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="#" class="navbar-brand">Movies</a>
+        </div>
+
+        <div class=" collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li routerLinkActive="active"><a routerLink="/addmovie">Add Movie</a></li>
+                <li routerLinkActive="active"><a routerLink="/movies">Movie List</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><button class="btn btn-default" type="button" (click)="onLogOut()">Log out</button></li>
+            </ul>
+            
+        </div>
+    </div>
+</nav>

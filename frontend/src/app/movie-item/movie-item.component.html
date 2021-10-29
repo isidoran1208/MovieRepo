@@ -1,0 +1,31 @@
+<a class="glyphicon glyphicon-chevron-left back_link" (click)="movieList()"> back to Movie List</a>
+<div class="col-sm-12 row">
+    <div class="pull-left movie_item col-sm-8">
+        <h2 class="form-group">{{movie.title}}</h2>
+        <a class="glyphicon glyphicon-thumbs-up" (click)="onMovieReaction(true)"></a><label class="like">{{getMovieLikes()}}</label>
+        <a class="glyphicon glyphicon-thumbs-down" (click)="onMovieReaction(false)"></a><label class="like">{{getMovieDislikes()}}</label>
+        <h4 class="form-group">Description: {{movie.description}}</h4>
+        <h4 class="form-group">Start date: {{movie.start_date}}</h4>
+        <h4 class="form-group">Genre: {{movie.genre}}</h4>
+    </div>
+    <span class="pull-right col-sm-2">
+        <img [src]="movie.photo" alt="{{movie.title}}" class="img-responsive" style="max-height: 300px;">
+    </span>
+</div>
+<div class="col-sm-12">
+    <div>
+        <p class="new_comment_text">New comment:</p>
+        <input class="new_comment" type="text" [(ngModel)]="newComment.text">
+        <br/>
+        <button class="btn btn-success post_comm_button" type="submit" (click)="onCommentPost()">Post</button>
+    </div>
+    <div *ngFor="let comm of movie.comments" >
+        <div class="container-fluid comment_item main_comment">
+            <h4>{{comm.user.username}}   
+                <!-- <a class="glyphicon glyphicon-thumbs-up" (click)="onCommentReaction(true, comm.id)"></a><label class="like">{{getCommLikes(comm)}}</label> -->
+                <!-- <a class="glyphicon glyphicon-thumbs-down" (click)="onCommentReaction(false, comm.id)"></a><label class="like">{{getCommDislikes(comm)}}</label> -->
+            </h4>
+            <p>{{comm.text}}</p>
+        </div>
+    </div>
+</div>

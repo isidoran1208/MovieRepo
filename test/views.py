@@ -1,4 +1,5 @@
 from http.client import BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK
+import re
 from django.http import *
 from rest_framework import views, viewsets
 from rest_framework.decorators import action, api_view
@@ -61,7 +62,7 @@ def handle_reaction(request, pk):
         reaction.reaction = not reaction.reaction
         reaction.save()
 
-        reaction_string = "liked" if reaction.reaction else "disliked"
+        # reaction_string = "liked" if reaction.reaction else "disliked"
         # return Response(f"Reaction updated: movie with id {pk} {reaction_string}.", status=OK)
         return Response(ReactionSerializer(reaction).data, status=OK)
 
@@ -69,7 +70,7 @@ def handle_reaction(request, pk):
         reaction = Reaction.objects.create(
             user_id=request.data.get('user'), movie_id=pk, reaction=request.data.get('reaction'))
 
-        reaction_string = "liked" if reaction.reaction else "disliked"
+        # reaction_string = "liked" if reaction.reaction else "disliked"
         # return Response(f"Reaction created: movie with id {pk} {reaction_string}.", status=OK)
         return Response(ReactionSerializer(reaction).data, status=OK)
 
@@ -106,8 +107,33 @@ def handle_comment_reaction(request, pk):
         raise e    
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+class CommentViewSet(viewsets.ModelViewSet):   
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Comment.objects.get(reply_to_isnull=False)
+        
+
+    @action(methods=['get'], detail=True)
+    def likes(self, request, pk):
+       likes = Comment.objects.get(id=pk).reactions.filter(reaction=True)
+       return Response(likes.count(), status=OK)   
+
+    @action(methods=['get'], detail=True)
+    def dislikes(self, request, pk):
+       dislikes = Comment.objects.get(id=pk).reactions.filter(reaction=False)
+       return Response(dislikes.count(), status=OK)   
+
+    @action(methods=['get'], detail=True)
+    def replies(self, request, pk):
+       replies = Comment.objects.get(id=pk).replies.all()
+       return Response(CommentSerializer(replies, many=True).data, status=OK)      
+
+    def get_serializer_class(self):
+        print(self.action)
+        if self.action == 'list' or self.action == 'retrieve':
+            return CommentSerializer
+        else:
+            return CommentPostSerializer
      

@@ -35,6 +35,7 @@ class Movie(models.Model):
     photo = models.ImageField(upload_to='movie_imgs', null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+
 @shared_task
 def send_mail_async(id):
     movie = Movie.objects.get(id=id)
@@ -47,7 +48,7 @@ def send_mail_async(id):
     )
 
 @receiver(post_save, sender=Movie)
-def notify_new_movie(sender, instance, created, **kwargs):
+def send_mail_movie(sender, instance, created, **kwargs):
     if created:
         send_mail_async.delay(instance.id)
 
@@ -64,13 +65,13 @@ class Comment(models.Model):
     movie = models.ForeignKey(
         Movie, on_delete=models.CASCADE, related_name="comments")
     text = models.CharField(max_length=500)
-    reply_to = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    reply_to = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name="replies")
 
 
 @receiver(post_save, sender=Movie)
 @receiver(post_save, sender=Comment)
 @receiver(post_save, sender=Reaction)
-def notify_new_movie(sender, instance, created, **kwargs):
+def notify_new_object(sender, instance, created, **kwargs):
     if created:
         send_mail_async.delay(instance.id)
 

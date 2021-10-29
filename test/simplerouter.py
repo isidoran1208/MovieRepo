@@ -8,7 +8,7 @@ from . import consumers
 router = routers.SimpleRouter()
 router.register(r'movies', MovieViewSet)
 router.register(r'users', AuthViewSet)
-router.register(r'comments', CommentViewSet)
+router.register(r'comments', CommentViewSet, basename='Comment')
 
 websocket_urlpatterns = [
     path('ws/movies/', consumers.MovieConsumer.as_asgi()),
